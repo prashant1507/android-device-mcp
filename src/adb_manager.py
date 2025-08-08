@@ -1,7 +1,8 @@
 import asyncio
+from typing import Optional
 
 
-async def run_adb(*args, timeout: float = 30.0) -> (int, str, str):
+async def run_adb(*args, timeout: Optional[float] = 30.0) -> (int, str, str):
     """Execute ADB command with timeout and error handling"""
     try:
         await ensure_adb_server()
@@ -21,7 +22,7 @@ async def run_adb(*args, timeout: float = 30.0) -> (int, str, str):
         raise RuntimeError(f"Failed to execute ADB command {' '.join(args)}: {str(e)}")
 
 
-async def ensure_adb_server(timeout: float = 30.0):
+async def ensure_adb_server(timeout: Optional[float] = 30.0):
     """Ensure ADB server is running and accessible"""
     try:
         command = ["adb", "start-server"]
