@@ -113,21 +113,42 @@ async def shutdown_device(serial: str) -> str:
         return f"Failed to shutdown device '{serial}': {str(e)}"
 
 
-async def take_screenshot(serial: str, save_path: Optional[str] = None) -> str:
+async def take_screenshot(serial: str, local_file_path: Optional[str] = None) -> str:
     """Take a screenshot from an Android device"""
     try:
-        if save_path is None:
-            save_path = f"{serial}_screenshot_{int(asyncio.get_event_loop().time())}.png"
+        if local_file_path is None:
+            local_file_path = f"/tmp/{serial}_screenshot_{int(asyncio.get_event_loop().time())}.png"
 
-        path_in_device = "/sdcard/screenshot.png"
+        path_in_device = f"/sdcard/{serial}_screenshot.png"
         code, screenshot_out, err = await run_adb("-s", serial, "shell", "screencap", path_in_device)
 
         if code != 0:
             raise Exception(f"Failed to take screenshot on device: {serial}")
 
-        await pull_file(serial, path_in_device, save_path)
+        await pull_file(serial, path_in_device, local_file_path)
         await remove_file(serial, path_in_device)
-        return f"Screenshot captured successfully from device '{serial}' and saved as: {save_path}"
+        return f"Screenshot captured successfully from device '{serial}' and saved to: {local_file_path}"
 
     except Exception as e:
         return f"Failed to capture screenshot from device '{serial}': {str(e)}"
+
+
+async def screen_recording(serial: str, time_limit: str, local_file_path: Optional[str] = None) -> str:
+    """Record screen for an Android device"""
+    try:
+        if local_file_path is None:
+            local_file_path = f"/tmp/{serial}_video_{int(asyncio.get_event_loop().time())}.mp4"
+
+        path_in_device = f"/sdcard/{serial}_video_recording.mp4"
+        code, recording_out, err = await run_adb("-s", serial, "shell", "screenrecord", "--time-limit", str(time_limit),
+                                                 path_in_device, timeout=2 * int(time_limit))
+
+        if code != 0:
+            raise Exception(f"Failed to record screen for device: {serial}")
+
+        await pull_file(serial, path_in_device, local_file_path)
+        await remove_file(serial, path_in_device)
+        return f"Screen recorded successfully from device '{serial}' and saved to: {local_file_path}"
+
+    except Exception as e:
+        return f"Failed to record screen of device '{serial}': {str(e)}"

@@ -1,6 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 
-from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices
+from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording
 from src.file_system import list_files, pull_file, push_file
 
 mcp = FastMCP("android-device-mcp")
@@ -29,9 +29,16 @@ async def shutdown_device_tool(serial: str):
 
 @mcp.tool(name="take_screenshot", title="Take Screenshot",
           description="Capture a screenshot from an Android device using its serial number.")
-async def take_screenshot_tool(serial: str):
+async def take_screenshot_tool(serial: str, local_file_path: str = None):
     """Captures a screenshot from the Android device identified by the given serial number."""
-    return await take_screenshot(serial)
+    return await take_screenshot(serial, local_file_path)
+
+
+@mcp.tool(name="screen_recording", title="Take Screenshot",
+          description="Record the screen of an Android device using its serial number.")
+async def screen_recording_tool(serial: str, time_limit: str = "5", local_file_path: str = None):
+    """Records the screen of the Android device identified by the given serial number."""
+    return await screen_recording(serial, time_limit, local_file_path)
 
 
 @mcp.tool(name="list_files", title="List Files",
@@ -50,6 +57,6 @@ async def pull_file_tool(serial: str, file_path_in_device: str, local_folder: st
 
 @mcp.tool(name="push_file",
           description="Push or copy files from a given directory on local machine to an Android device using its serial number.")
-async def push_file_tool(serial: str, local_file: str, folder_path_in_device: str = None):
+async def push_file_tool(serial: str, local_file: str, folder_path_in_device: str):
     """Push or copy a file from the specified local directory to the Android device identified by the serial number."""
     return await push_file(serial, local_file, folder_path_in_device)
