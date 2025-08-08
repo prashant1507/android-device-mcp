@@ -1,0 +1,10 @@
+[project]
+name = "android-device-mcp"
+version = "0.1.0"
+description = "Android device MCP tools"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp[cli]>=1.12.4",
+    "pydantic>=2.11.7",
+]
