@@ -1,6 +1,7 @@
 from mcp.server.fastmcp import FastMCP
 
-from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording
+from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording, \
+    list_installed_apps
 from src.file_system import list_files, pull_file, push_file
 
 mcp = FastMCP("android-device-mcp")
@@ -48,15 +49,22 @@ async def list_files_tool(serial: str, file_path_in_device: str):
     return await list_files(serial, file_path_in_device)
 
 
-@mcp.tool(name="pull_file",
+@mcp.tool(name="pull_file", title="Copy Files from Device",
           description="Pull or copy files from a given directory on an Android device using its serial number.")
 async def pull_file_tool(serial: str, file_path_in_device: str, local_folder: str = None):
     """Pull or copy a file from the specified directory on the Android device identified by the serial number."""
     return await pull_file(serial, file_path_in_device, local_folder)
 
 
-@mcp.tool(name="push_file",
+@mcp.tool(name="push_file", title="Copy File to Device",
           description="Push or copy files from a given directory on local machine to an Android device using its serial number.")
 async def push_file_tool(serial: str, local_file: str, folder_path_in_device: str):
     """Push or copy a file from the specified local directory to the Android device identified by the serial number."""
     return await push_file(serial, local_file, folder_path_in_device)
+
+
+@mcp.tool(name="list_installed_apps", title="List Installed Applications",
+          description="List all installed applications on a specific Android device")
+async def list_installed_apps_tool(serial: str):
+    """List installed applications on a specific Android device"""
+    return await list_installed_apps(serial)

@@ -11,7 +11,8 @@ async def list_devices(timeout: Optional[float] = 5.0):
         code, list_devices_out, err = await run_adb("devices", "-l", timeout=timeout)
         if code != 0:
             raise RuntimeError(f"Failed to list devices: {err.strip()}")
-        return await device_details(list_devices_out)
+        else:
+            return await device_details(list_devices_out)
     except Exception as e:
         return f"Failed to list Android devices: {str(e)}"
 
@@ -124,10 +125,10 @@ async def take_screenshot(serial: str, local_file_path: Optional[str] = None) ->
 
         if code != 0:
             raise Exception(f"Failed to take screenshot on device: {serial}")
-
-        await pull_file(serial, path_in_device, local_file_path)
-        await remove_file(serial, path_in_device)
-        return f"Screenshot captured successfully from device '{serial}' and saved to: {local_file_path}"
+        else:
+            await pull_file(serial, path_in_device, local_file_path)
+            await remove_file(serial, path_in_device)
+            return f"Screenshot captured successfully from device '{serial}' and saved to: {local_file_path}"
 
     except Exception as e:
         return f"Failed to capture screenshot from device '{serial}': {str(e)}"
@@ -145,10 +146,33 @@ async def screen_recording(serial: str, time_limit: str, local_file_path: Option
 
         if code != 0:
             raise Exception(f"Failed to record screen for device: {serial}")
-
-        await pull_file(serial, path_in_device, local_file_path)
-        await remove_file(serial, path_in_device)
-        return f"Screen recorded successfully from device '{serial}' and saved to: {local_file_path}"
+        else:
+            await pull_file(serial, path_in_device, local_file_path)
+            await remove_file(serial, path_in_device)
+            return f"Screen recorded successfully from device '{serial}' and saved to: {local_file_path}"
 
     except Exception as e:
         return f"Failed to record screen of device '{serial}': {str(e)}"
+
+
+async def list_installed_apps(serial: str) -> str:
+    """List all the installed packages of an Android device"""
+    try:
+        code, installed_packages_out, err = await run_adb("-s", serial, "shell", "pm", "list", "packages", "--user",
+                                                          "0")
+        if code != 0:
+            raise Exception(f"Failed to get installed apps list for device: {serial}")
+        else:
+            installed_packages_out = installed_packages_out.split('\n')
+            if not installed_packages_out or installed_packages_out[0] == "":
+                return f"No installed apps found on device '{serial}'"
+            else:
+                output = f"Count: {len(installed_packages_out)}\n"
+                for i, package in enumerate(installed_packages_out, 1):
+                    if package.startswith("package:"):
+                        app_name = package.replace("package:", "").strip()
+                        output += f"{i:3d}. {app_name}\n"
+
+                return output
+    except Exception as e:
+        return f"Failed to get installed apps list for device '{serial}': {str(e)}"
