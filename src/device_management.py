@@ -176,3 +176,80 @@ async def list_installed_apps(serial: str) -> str:
                 return output
     except Exception as e:
         return f"Failed to get installed apps list for device '{serial}': {str(e)}"
+
+
+async def clear_logs(serial: str) -> str:
+    """Clear logs from logcat of an Android device"""
+    try:
+        code, clear_logs_out, err = await run_adb("-s", serial, "logcat", "-c")
+        if code != 0:
+            raise Exception(f"Failed to clear logs for device: {serial}")
+        else:
+            return f"Logs cleared for device '{serial}'"
+    except Exception as e:
+        return f"Failed to clear logs for device '{serial}': {str(e)}"
+
+
+async def get_logs(serial: str, time_out: float = 10.0, local_log_file_path: Optional[str] = None) -> str:
+    """Get and save logs from logcat of an Android device for the specified duration"""
+    proc = None
+    logs_output = ""
+
+    try:
+        if local_log_file_path is None:
+            local_log_file_path = f"/tmp/{serial}_logcat_{int(asyncio.get_event_loop().time())}.log"
+
+        # Use a more reliable approach with timeout
+        adb_cmd = ["adb", "-s", serial, "logcat"]
+        proc = await asyncio.create_subprocess_exec(
+            *adb_cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+
+        # Collect logs for the specified duration
+        start_time = asyncio.get_event_loop().time()
+
+        while (asyncio.get_event_loop().time() - start_time) < time_out:
+            # Use a shorter timeout for each read to allow checking the total time
+            remaining_time = time_out - (asyncio.get_event_loop().time() - start_time)
+            if remaining_time <= 0:
+                break
+
+            try:
+                # Use the remaining time as timeout, but cap it at 0.5 seconds
+                read_timeout = min(0.5, remaining_time)
+                stdout_data = await asyncio.wait_for(proc.stdout.readline(), timeout=read_timeout)
+                if stdout_data:
+                    logs_output += stdout_data.decode(errors="ignore")
+            except asyncio.TimeoutError:
+                # No data available, continue collecting
+                continue
+            except Exception as e:
+                # The Process might have ended or other error occurred
+                print(f"Warning: Error reading logcat output: {str(e)}")
+                break
+
+        # Write collected logs to file (this is always reachable if we get here)
+        try:
+            with open(local_log_file_path, 'w', encoding='utf-8') as f:
+                f.write(logs_output)
+
+            actual_duration = asyncio.get_event_loop().time() - start_time if start_time else 0
+            return f"Logs saved for device '{serial}' at '{local_log_file_path}' (collected for {actual_duration:.1f} seconds)"
+        except Exception as e:
+            return f"Failed to write logs to file for device '{serial}': {str(e)}"
+    except Exception as e:
+        return f"Failed to get logs for device '{serial}': {str(e)}"
+
+    finally:
+        # Ensure the process is terminated
+        if proc:
+            try:
+                proc.terminate()
+                await asyncio.wait_for(proc.wait(), timeout=2.0)
+            except asyncio.TimeoutError:
+                proc.kill()
+                await proc.wait()
+            except Exception as e:
+                return f"Warning: Error terminating logcat process: {str(e)}"
