@@ -72,9 +72,9 @@ async def list_installed_apps_tool(serial: str):
     return await list_installed_apps(serial)
 
 
-@mcp.tool(name="clear_logs", title="Clears Logs",
+@mcp.tool(name="clear_device_logs", title="Clears Logs",
           description="Clear logs from logcat on a specific Android device")
-async def clear_logs_tool(serial: str):
+async def clear_device_logs_tool(serial: str):
     """Clear logs from logcat on a specific Android device"""
     return await clear_logs(serial)
 
