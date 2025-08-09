@@ -79,8 +79,8 @@ async def clear_logs_tool(serial: str):
     return await clear_logs(serial)
 
 
-@mcp.tool(name="get_logs", title="Get and Save Logs",
+@mcp.tool(name="get_device_logs", title="Get and Save Logs",
           description="Get and save logs from logcat on a specific Android device")
-async def get_logs_tool(serial: str, time_out: float = 10.0, local_log_file_path: Optional[str] = None):
+async def get_device_logs_tool(serial: str, time_out: float = 10.0, local_log_file_path: Optional[str] = None):
     """Get and save logs from logcat on a specific Android device"""
     return await get_logs(serial, time_out, local_log_file_path)
