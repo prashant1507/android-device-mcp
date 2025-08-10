@@ -26,3 +26,27 @@ async def get_app_details(serial: str, app_package_name: str):
             return json.dumps(info, indent=4)
     except Exception as e:
         return f"Failed to get package/app details for device '{serial}': {str(e)}"
+
+
+async def install_app(serial: str, apk_path: str):
+    """Install an app in an Android device using apk."""
+    try:
+        code, app_details_out, err = await run_adb("-s", serial, "install", apk_path)
+        if code != 0:
+            raise RuntimeError(f"adb failed to install app using apk: {err.strip()}")
+        else:
+            return f"App installed successfully in device '{serial}'"
+    except Exception as e:
+        return f"Failed to install app using apk: {serial}: {str(e)}"
+
+
+async def uninstall_app(serial: str, app_package_name: str):
+    """Uninstall an app from an Android device using app or package name"""
+    try:
+        code, app_details_out, err = await run_adb("-s", serial, "uninstall", app_package_name)
+        if code != 0:
+            raise RuntimeError(f"adb failed to uninstall app: {err.strip()}")
+        else:
+            return f"App uninstalled successfully from device '{serial}'"
+    except Exception as e:
+        return f"Failed to uninstall app: {serial}: {str(e)}"
