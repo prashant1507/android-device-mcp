@@ -2,6 +2,7 @@ from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
+from src.app_management import get_app_details
 from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording, \
     list_installed_apps, clear_logs, get_logs
 from src.file_system import list_files, pull_file, push_file
@@ -84,3 +85,10 @@ async def clear_device_logs_tool(serial: str):
 async def get_device_logs_tool(serial: str, time_out: float = 10.0, local_log_file_path: Optional[str] = None):
     """Get and save logs from logcat on a specific Android device"""
     return await get_logs(serial, time_out, local_log_file_path)
+
+
+@mcp.tool(name="get_app_details", title="Get app details",
+          description="Retrieve detailed information about an installed app using its name or package name.")
+async def get_app_details_tool(serial: str, app_package_name: str):
+    """Fetch details of an installed application by specifying its name or package name."""
+    return await get_app_details(serial, app_package_name)
