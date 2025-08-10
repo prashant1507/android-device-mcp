@@ -79,80 +79,66 @@ async def device_details(output: str):
 
 async def get_battery_details(serial: str):
     code, dumpsys_battery_out, err = await run_adb("-s", serial, "shell", "dumpsys", "battery")
-    if code == 0 and dumpsys_battery_out:
-        raw_data = {}
-        for line in dumpsys_battery_out.split('\n'):
-            line = line.strip()
-            if ':' in line and not line.startswith('Current Battery Service state'):
-                key, value = line.split(':', 1)
-                key = key.strip()
-                value = value.strip()
-                raw_data[key] = value
-
-        return f"{int(raw_data.get('level', 0))}%"
-    else:
+    if code != 0 or not dumpsys_battery_out:
         return "Unknown"
+
+    for line in dumpsys_battery_out.split('\n'):
+        line = line.strip()
+        if line.startswith('level:'):
+            try:
+                return f"{int(line.split(':', 1)[1].strip())}%"
+            except (ValueError, IndexError):
+                continue
+    return "Unknown"
 
 
 async def get_network_details(serial: str):
-    # Network Information
-    network_info = {
-        'ip_address': 'Unknown',
-        'wifi_name': 'Unknown',
-        'connection_type': 'Unknown'
-    }
+    network_info = {'ip_address': 'Unknown', 'wifi_name': 'Unknown', 'connection_type': 'Unknown'}
 
-    # Get IP address
+    # Get IP address - try primary method first
     code, ip_out, err = await run_adb("-s", serial, "shell", "ip", "addr", "show")
-    if code == 0 and ip_out:
+    if code == 0 and ip_out and 'wlan0' in ip_out:
         for line in ip_out.split('\n'):
-            line = line.strip()
-            # Look for wlan0 interface IP
-            if 'inet ' in line and 'wlan0' in ip_out:
-                if line.startswith('inet ') and not line.startswith('inet 127.'):
-                    ip_addr = line.split()[1].split('/')[0]
-                    if not ip_addr.startswith('127.'):
-                        network_info['ip_address'] = ip_addr
-                        break
+            if line.strip().startswith('inet ') and not line.strip().startswith('inet 127.'):
+                ip_addr = line.split()[1].split('/')[0]
+                if not ip_addr.startswith('127.'):
+                    network_info['ip_address'] = ip_addr
+                    break
 
-    # Alternative method for IP if above fails
+    # Fallback for IP if primary failed
     if network_info['ip_address'] == 'Unknown':
-        code, ip_out2, err = await run_adb("-s", serial, "shell", "ifconfig", "wlan0")
-        if code == 0 and ip_out2:
-            for line in ip_out2.split('\n'):
+        code, ip_out, err = await run_adb("-s", serial, "shell", "ifconfig", "wlan0")
+        if code == 0 and ip_out and 'inet addr:' in ip_out:
+            for line in ip_out.split('\n'):
                 if 'inet addr:' in line:
                     ip_addr = line.split('inet addr:')[1].split()[0]
                     if not ip_addr.startswith('127.'):
                         network_info['ip_address'] = ip_addr
                         break
 
-    # Get WiFi name (SSID)
+    # Get Wi-Fi name - try primary method first
     code, wifi_out, err = await run_adb("-s", serial, "shell", "dumpsys", "wifi")
     if code == 0 and wifi_out:
         for line in wifi_out.split('\n'):
             line = line.strip()
-            # Look for current WiFi network
-            if 'mWifiInfo' in line and 'SSID:' in line:
+            if ('mWifiInfo' in line and 'SSID:' in line) or 'Connected to:' in line:
                 try:
-                    ssid = line.split('SSID:')[1].split(',')[0].strip()
-                    if ssid and ssid != '<unknown ssid>' and ssid != 'null':
-                        network_info['wifi_name'] = ssid.strip('"')
-                except:
-                    pass
-            # Alternative pattern
-            elif 'Connected to:' in line:
-                try:
-                    ssid = line.split('Connected to:')[1].strip()
-                    if ssid and ssid != '<unknown ssid>':
-                        network_info['wifi_name'] = ssid.strip('"')
-                except:
-                    pass
+                    if 'SSID:' in line:
+                        ssid = line.split('SSID:')[1].split(',')[0].strip().strip('"')
+                    else:
+                        ssid = line.split('Connected to:')[1].strip().strip('"')
 
-    # Alternative method for Wi-Fi name
+                    if ssid and ssid not in ['<unknown ssid>', 'null', '']:
+                        network_info['wifi_name'] = ssid
+                        break
+                except:
+                    continue
+
+    # Fallback for WiFi name if primary failed
     if network_info['wifi_name'] == 'Unknown':
-        code, wifi_out2, err = await run_adb("-s", serial, "shell", "dumpsys", "connectivity")
-        if code == 0 and wifi_out2:
-            for line in wifi_out2.split('\n'):
+        code, wifi_out, err = await run_adb("-s", serial, "shell", "dumpsys", "connectivity")
+        if code == 0 and wifi_out and 'ExtraInfo:' in wifi_out:
+            for line in wifi_out.split('\n'):
                 if 'ExtraInfo:' in line and '"' in line:
                     try:
                         ssid = line.split('"')[1]
@@ -160,14 +146,11 @@ async def get_network_details(serial: str):
                             network_info['wifi_name'] = ssid
                             break
                     except:
-                        pass
+                        continue
 
-    # Determine connection type
+    # Set connection type based on available info
     if network_info['ip_address'] != 'Unknown':
-        if network_info['wifi_name'] != 'Unknown':
-            network_info['connection_type'] = 'WiFi'
-        else:
-            network_info['connection_type'] = 'Mobile Data'
+        network_info['connection_type'] = 'WiFi' if network_info['wifi_name'] != 'Unknown' else 'Mobile Data'
 
     return network_info
 
