@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 
 from src.app_management import get_app_details, install_app, uninstall_app
 from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording, \
-    list_installed_apps, clear_logs, get_logs
+    list_installed_apps, clear_logs, get_logs, get_network_details
 from src.file_system import list_files, pull_file, push_file
 
 mcp = FastMCP("android-device-mcp")
@@ -92,6 +92,13 @@ async def get_device_logs_tool(serial: str, time_out: float = 10.0, local_log_fi
 async def get_app_details_tool(serial: str, app_package_name: str):
     """Fetch details of an installed application by specifying its name or package name."""
     return await get_app_details(serial, app_package_name)
+
+
+@mcp.tool(name="get_network_details", title="Get network details",
+          description="Retrieve network, Wi-Fi information for an Android device by serial number.")
+async def network_details_tool(serial: str):
+    """Retrieve network, Wi-Fi information for a connected Android device."""
+    return await get_network_details(serial)
 
 
 @mcp.tool(name="install_app", title="Install app",
