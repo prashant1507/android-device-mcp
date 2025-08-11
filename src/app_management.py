@@ -50,3 +50,15 @@ async def uninstall_app(serial: str, app_package_name: str):
             return f"App uninstalled successfully from device '{serial}'"
     except Exception as e:
         return f"Failed to uninstall app: {serial}: {str(e)}"
+
+
+async def launch_app(serial: str, package_name: str):
+    """Launch an app in an Android device using app or package name"""
+    try:
+        code, app_details_out, err = await run_adb("-s", serial, "shell",  "monkey", "-p", package_name, "-c", "android.intent.category.LAUNCHER", "1")
+        if code != 0:
+            raise RuntimeError(f"adb failed to launch an app: {err.strip()}")
+        else:
+            return f"App launched successfully in device '{serial}'"
+    except Exception as e:
+        return f"Failed to uninstall app: {serial}: {str(e)}"

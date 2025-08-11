@@ -2,7 +2,7 @@ from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 
-from src.app_management import get_app_details, install_app, uninstall_app
+from src.app_management import get_app_details, install_app, uninstall_app, launch_app
 from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording, \
     list_installed_apps, clear_logs, get_logs, get_network_details
 from src.file_system import list_files, pull_file, push_file
@@ -113,3 +113,9 @@ async def install_app_tool(serial: str, apk_path: str):
 async def uninstall_app_tool(serial: str, app_package_name: str):
     """Uninstall an APP from a connected Android device."""
     return await uninstall_app(serial, app_package_name)
+
+@mcp.tool(name="launch_app", title="Launch app",
+          description="Launch an APP in an Android device.")
+async def launch_app_tool(serial: str, package_name: str):
+    """Launch an APP in a connected Android device."""
+    return await launch_app(serial, package_name)
