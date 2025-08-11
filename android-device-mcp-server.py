@@ -4,7 +4,7 @@ from mcp.server.fastmcp import FastMCP
 
 from src.app_management import get_app_details, install_app, uninstall_app, launch_app
 from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording, \
-    list_installed_apps, clear_logs, get_logs, get_network_details
+    list_installed_apps, clear_logs, get_logs, get_network_details, execute_shell
 from src.file_system import list_files, pull_file, push_file
 
 mcp = FastMCP("android-device-mcp")
@@ -114,8 +114,19 @@ async def uninstall_app_tool(serial: str, app_package_name: str):
     """Uninstall an APP from a connected Android device."""
     return await uninstall_app(serial, app_package_name)
 
+
 @mcp.tool(name="launch_app", title="Launch app",
           description="Launch an APP in an Android device.")
 async def launch_app_tool(serial: str, package_name: str):
     """Launch an APP in a connected Android device."""
     return await launch_app(serial, package_name)
+
+
+@mcp.tool(name="execute_shell_command", title="Execute shell command",
+          description="Execute shell command in an Android device.")
+async def execute_shell_command_tool(serial: str, command: str):
+    """
+    Execute shell command in a connected Android device.
+    E.g., If you want to execute `adb shell ls /sdcard/` then just provide `ls /sdcard`
+    """
+    return await execute_shell(serial, command)

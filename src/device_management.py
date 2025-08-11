@@ -256,6 +256,7 @@ async def clear_logs(serial: str) -> str:
 
 
 async def get_logs(serial: str, time_out: float = 10.0, local_log_file_path: Optional[str] = None) -> str:
+    """Get logs from logcat of an Android device"""
     proc = None
     logs_output = []
 
@@ -315,3 +316,15 @@ async def get_logs(serial: str, time_out: float = 10.0, local_log_file_path: Opt
                 await proc.wait()
             except Exception as e:
                 print(f"[logcat] Failed to terminate process cleanly: {e}")
+
+
+async def execute_shell(serial: str, command: str):
+    """Execute command in an Android device using apk."""
+    try:
+        code, execute_command_out, err = await run_adb("-s", serial, "shell", command)
+        if code != 0:
+            raise RuntimeError(f"adb failed to execute command: {err.strip()}")
+        else:
+            return execute_command_out
+    except Exception as e:
+        return f"Failed to execute command: {serial}: {str(e)}"
