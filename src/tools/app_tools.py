@@ -6,7 +6,7 @@ from src.device_management import list_installed_apps
 
 def register_app_tools(mcp: FastMCP):
     """Register app management tools with the MCP server"""
-    
+
     @mcp.tool(name="list_installed_apps", title="List Installed Applications",
               description="List all installed applications on a specific Android device")
     async def list_installed_apps_tool(serial: str):

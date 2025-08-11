@@ -1,4 +1,5 @@
 from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 
 from src.device_management import clear_logs, get_logs, execute_shell
@@ -6,7 +7,7 @@ from src.device_management import clear_logs, get_logs, execute_shell
 
 def register_system_tools(mcp: FastMCP):
     """Register system monitoring and shell command tools with the MCP server"""
-    
+
     @mcp.tool(name="clear_device_logs", title="Clears Logs",
               description="Clear logs from logcat on a specific Android device")
     async def clear_device_logs_tool(serial: str):

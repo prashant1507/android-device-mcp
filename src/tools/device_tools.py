@@ -1,4 +1,5 @@
 from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 
 from src.device_management import reboot_device, shutdown_device, take_screenshot, list_devices, screen_recording, \

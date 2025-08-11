@@ -1,4 +1,5 @@
 from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 
 from src.file_system import list_files, pull_file, push_file
@@ -6,7 +7,7 @@ from src.file_system import list_files, pull_file, push_file
 
 def register_file_tools(mcp: FastMCP):
     """Register file system tools with the MCP server"""
-    
+
     @mcp.tool(name="list_files", title="List Files",
               description="List all files in a given directory on an Android device using its serial number.")
     async def list_files_tool(serial: str, file_path_in_device: str):
