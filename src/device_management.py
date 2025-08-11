@@ -155,10 +155,13 @@ async def get_network_details(serial: str):
     return network_info
 
 
-async def reboot_device(serial: str) -> str:
+async def reboot_device(serial: str, mode: Optional[str] = None) -> str:
     """Reboot a specific Android device"""
     try:
-        code, reboot_out, err = await run_adb("-s", serial, "reboot")
+        if mode is None:
+            code, reboot_out, err = await run_adb("-s", serial, "reboot")
+        else:
+            code, reboot_out, err = await run_adb("-s", serial, "reboot", mode)
         if code != 0:
             raise RuntimeError(f"adb reboot failed: {err.strip()}")
         else:
@@ -218,6 +221,26 @@ async def screen_recording(serial: str, time_limit: str, local_file_path: Option
 
     except Exception as e:
         return f"Failed to record screen of device '{serial}': {str(e)}"
+
+
+async def dump_screen(serial: str, local_file_path: Optional[str] = None) -> str:
+    """Dump current screen of an Android device"""
+    try:
+        if local_file_path is None:
+            local_file_path = f"/tmp/{serial}_dump_xml_{int(asyncio.get_event_loop().time())}.xml"
+
+        path_in_device = f"/sdcard/{serial}_dump_xml.xml"
+        code, dump_xml_out, err = await run_adb("-s", serial, "shell", "uiautomator", "dump", path_in_device)
+
+        if code != 0:
+            raise Exception(f"Failed to dump xml for device: {serial}")
+        else:
+            await pull_file(serial, path_in_device, local_file_path)
+            await remove_file(serial, path_in_device)
+            return f"Dumped xml for current screen for device '{serial}' and saved to: {local_file_path}"
+
+    except Exception as e:
+        return f"Failed to dump current screen of device '{serial}': {str(e)}"
 
 
 async def list_installed_apps(serial: str) -> str:
