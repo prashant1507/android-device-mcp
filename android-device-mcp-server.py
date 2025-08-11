@@ -14,8 +14,5 @@ register_app_tools(mcp)
 register_file_tools(mcp)
 register_system_tools(mcp)
 
-# The server is now ready with all tools registered
 if __name__ == "__main__":
-    # This would typically start the server
-    # For MCP, the server is usually started by the MCP framework
     pass
