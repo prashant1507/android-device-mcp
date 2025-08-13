@@ -1,3 +1,6 @@
+<img src="https://github.com/prashant1507/android-device-mcp/blob/main/resources/mcp.png" alt="Android MCP" width="400">
+
+
 # Android Device MCP
 
 A Model Context Protocol (MCP) server that provides comprehensive Android device management capabilities through ADB (
