@@ -1,5 +1,6 @@
-<img src="https://github.com/prashant1507/android-device-mcp/blob/main/resources/mcp.png" alt="Android MCP" width="200">
-
+<p align="center">
+  <img src="https://github.com/prashant1507/android-device-mcp/blob/main/resources/mcp.png" alt="Android MCP" width="200">
+</p>
 
 # Android Device MCP
 
