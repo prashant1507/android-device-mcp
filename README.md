@@ -1,11 +1,9 @@
-<img src="https://github.com/prashant1507/android-device-mcp/blob/main/resources/mcp.png" alt="Android MCP" width="400">
+<img src="https://github.com/prashant1507/android-device-mcp/blob/main/resources/mcp.png" alt="Android MCP" width="200">
 
 
 # Android Device MCP
 
-A Model Context Protocol (MCP) server that provides comprehensive Android device management capabilities through ADB (
-Android Debug Bridge). This tool allows you to interact with Android devices programmatically for device management, app
-management, file operations, and system monitoring.
+A Model Context Protocol (MCP) server that provides comprehensive Android device management capabilities through ADB (Android Debug Bridge). This tool allows you to interact with Android devices programmatically for device management, app management, file operations, and system monitoring.
 
 ---
 
@@ -13,9 +11,9 @@ management, file operations, and system monitoring.
 
 ### Device Management
 
-- **List Devices**: Get detailed information about all connected Android devices including OS version, hardware specs,
+- **List Devices**: Get detailed information about all connected Android devices, including OS version, hardware specs,
   battery status, and network details
-- **Device Control**: Reboot and shutdown devices with optional boot modes
+- **Device Control**: Reboot and shut down devices with optional boot modes
 - **Screenshots**: Capture device screenshots and save them locally
 - **Screen Recording**: Record device screen activity for specified durations
 - **Screen Dump**: Export current screen layout as XML for UI automation
@@ -32,8 +30,8 @@ management, file operations, and system monitoring.
 ### File System Operations
 
 - **List Files**: Browse directories on Android devices
-- **Pull Files**: Copy files from devices to local system
-- **Push Files**: Copy files from local system to devices
+- **Pull Files**: Copy files from devices to the local system
+- **Push Files**: Copy files from the local system to the devices
 - **Remove Files**: Delete files from devices
 
 ### System Monitoring
@@ -48,7 +46,7 @@ management, file operations, and system monitoring.
 - ADB (Android Debug Bridge) installed and accessible in PATH
 - Android device(s) connected via USB with USB debugging enabled
 - Device(s) authorized for ADB access
-- uv is installed
+- UV is installed
 
 ## Installation
 
@@ -116,14 +114,14 @@ error scenarios include:
 ### Permission Errors
 
 - Ensure the device is unlocked and authorized
-- Check that the app has necessary permissions
+- Check that the app has the necessary permissions
 - For file operations, verify the target directories are writable
 
 ### Timeout Issues
 
 - Increase timeout values for slow devices or large file transfers
 - Check device performance and available storage
-- Ensure stable USB connection
+- Ensure a stable USB connection
 
 ---
 
